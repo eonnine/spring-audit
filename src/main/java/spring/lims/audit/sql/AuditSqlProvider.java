@@ -45,6 +45,9 @@ public class AuditSqlProvider {
 
     private List<String> getParameterIdFields(List<String> idFields, Map<String, Object> parameter) {
         List<String> sameOrLessIdFields = idFields.stream().filter(parameter::containsKey).collect(Collectors.toList());
+        if (sameOrLessIdFields.size() == 0) {
+            throw new RuntimeException("Parameter does not have id fields. not exists fields -> [" + String.join(", ", idFields) + "]");
+        }
         return idFields.size() == sameOrLessIdFields.size() ? idFields : sameOrLessIdFields;
     }
 

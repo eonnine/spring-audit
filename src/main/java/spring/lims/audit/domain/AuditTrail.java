@@ -7,7 +7,7 @@ public class AuditTrail {
     private final CommandType commandType;
     private final String label;
     private final String content;
-    private final String diffString;
+    private final String diff;
     private final Map<String, Object> id;
     private final Map<String, Object> param;
 
@@ -23,8 +23,8 @@ public class AuditTrail {
         return this.content;
     }
 
-    public String getDiffString() {
-        return this.diffString;
+    public String getDiff() {
+        return this.diff;
     }
 
     public Map<String, Object> getId() {
@@ -35,11 +35,11 @@ public class AuditTrail {
         return param;
     }
 
-    AuditTrail(CommandType commandType, String label, String content, String diffString, Map<String, Object> id, Map<String, Object> param) {
+    AuditTrail(CommandType commandType, String label, String content, String diff, Map<String, Object> id, Map<String, Object> param) {
         this.commandType = commandType;
         this.label = label;
         this.content = content;
-        this.diffString = diffString;
+        this.diff = diff;
         this.id = id;
         this.param = param;
     }
@@ -52,7 +52,7 @@ public class AuditTrail {
         private CommandType commandType;
         private String label;
         private String content;
-        private String diffString;
+        private String diff;
         private Map<String, Object> id;
         private Map<String, Object> param;
 
@@ -74,8 +74,8 @@ public class AuditTrail {
             return this;
         }
 
-        public AuditTrailBuilder diffString(String diffString) {
-            this.diffString = diffString;
+        public AuditTrailBuilder diff(String diff) {
+            this.diff = diff;
             return this;
         }
 
@@ -90,7 +90,7 @@ public class AuditTrail {
         }
 
         public AuditTrail build() {
-            return new AuditTrail(this.commandType, this.label, this.content, this.diffString, this.id, this.param);
+            return new AuditTrail(this.commandType, this.label, this.content, this.diff, this.id, this.param);
         }
     }
 }

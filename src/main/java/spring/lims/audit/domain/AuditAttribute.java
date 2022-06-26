@@ -22,7 +22,7 @@ public class AuditAttribute {
                 .commandType(getCommandType())
                 .label(getLabel())
                 .content(getContent())
-                .diffString(getDiffString(configurer.displayType()))
+                .diff(getDiffString(configurer.displayType()))
                 .id(getId())
                 .param(getParameter())
                 .build();
@@ -100,13 +100,17 @@ public class AuditAttribute {
                     )
                     .collect(Collectors.joining(", "));
 
-            result.add(rowString);
+            result.add("{ " + rowString + " }");
         }
-        return String.join(" / ", result);
+        return String.join(",  ", result);
     }
 
     private String toRowString(String label, String originData, String updatedData) {
-        return "{ " + label + ": [" + originData + "] -> [" + updatedData + "] }";
+        return n(label) + ": `" + n(originData) + "` -> `" + n(updatedData) + "`";
+    }
+
+    private String n(String n) {
+        return n == null ? "" : n;
     }
 
     private List<SqlRow> copyAsEmptyList(List<SqlRow> target) {

@@ -17,6 +17,7 @@ public class FieldNameConverter implements StringConverter {
     public FieldNameConverter(AuditConfigurer configurer) {
         this.configurer = configurer;
         this.converter = Map.of(
+                StringConvertCase.NONE, this::none,
                 StringConvertCase.CAMEL_TO_SNAKE, this::camelToSnake,
                 StringConvertCase.SNAKE_TO_CAMEL, this::snakeToCamel
         );
@@ -25,6 +26,10 @@ public class FieldNameConverter implements StringConverter {
     @Override
     public String convert(String s) {
         return this.converter.get(configurer.convertCase()).apply(s);
+    }
+
+    private String none(String s) {
+        return s;
     }
 
     private String camelToSnake(String str) {

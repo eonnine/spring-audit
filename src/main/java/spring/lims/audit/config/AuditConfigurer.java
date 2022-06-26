@@ -1,6 +1,6 @@
 package spring.lims.audit.config;
 
-import spring.lims.audit.domain.DataBaseType;
+import spring.lims.audit.domain.DatabaseType;
 import spring.lims.audit.domain.DisplayType;
 import spring.lims.audit.domain.RecordScope;
 import spring.lims.audit.domain.StringConvertCase;
@@ -19,8 +19,8 @@ public interface AuditConfigurer {
         return StringConvertCase.CAMEL_TO_SNAKE;
     }
 
-    default DataBaseType databaseType() {
-        return DataBaseType.ORACLE;
+    default DatabaseType databaseType() {
+        return DatabaseType.ORACLE;
     }
 
 }

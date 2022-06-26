@@ -3,7 +3,7 @@ package spring.lims.audit.config;
 import spring.lims.audit.context.AuditManager;
 import spring.lims.audit.context.DecisiveRecordAuditManager;
 import spring.lims.audit.context.FullRecordAuditManager;
-import spring.lims.audit.domain.DataBaseType;
+import spring.lims.audit.domain.DatabaseType;
 import spring.lims.audit.domain.RecordScope;
 import spring.lims.audit.event.AuditEventListener;
 import spring.lims.audit.event.AuditEventPublisher;
@@ -70,7 +70,7 @@ public class AuditBeanConfig {
         throw new RuntimeException("Unknown auditTrail record scope. Configure record scope using AuditTrailConfigurer");
     }
 
-    private AuditSqlGenerator createAuditSqlGenerator(DataBaseType dataBaseType) {
+    private AuditSqlGenerator createAuditSqlGenerator(DatabaseType dataBaseType) {
         if (dataBaseType.isOracle()) {
             return new OracleAuditSqlGenerator();
         }

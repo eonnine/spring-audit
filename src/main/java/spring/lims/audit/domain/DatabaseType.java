@@ -1,9 +1,9 @@
 package spring.lims.audit.domain;
 
-public enum DataBaseType {
+public enum DatabaseType {
     ORACLE;
 
     public boolean isOracle() {
-        return this == DataBaseType.ORACLE;
+        return this == DatabaseType.ORACLE;
     }
 }

@@ -59,13 +59,13 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         String auditKey = generateAuditKey(entityId, entityClazz);
 
         if (isPreSnapshotTarget(auditKey)) {
-            preSnapshot(auditKey, entityClazz, entityId, sqlParameters, auditParameter, auditAnnotation);
+            preSnapshot(auditKey, entityClazz, entityId, sqlParameters, auditAnnotation);
         }
 
         Object result = target.proceed();
 
         if (isPostSnapshotTarget(result)) {
-            postSnapshot(auditKey, entityClazz, sqlParameters, args);
+            postSnapshot(auditKey, entityClazz, sqlParameters, auditParameter, args);
         }
 
         return result;
@@ -76,8 +76,7 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         AuditTransactionManager.bindListener(transactionListener);
     }
 
-    private void preSnapshot(String auditKey, Class<?> entityClazz, Map<String, Object> entityId,
-                             List<SqlParameter> sqlParameters, Map<String, Object> auditParameter, Audit auditAnnotation) {
+    private void preSnapshot(String auditKey, Class<?> entityClazz, Map<String, Object> entityId, List<SqlParameter> sqlParameters, Audit auditAnnotation) {
         List<SqlRow> originData = repository.findAllById(entityClazz, sqlParameters);
 
         AuditAttribute auditTrail = new AuditAttribute();
@@ -85,12 +84,11 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         auditTrail.setContent(auditAnnotation.content());
         auditTrail.setOriginRows(originData);
         auditTrail.setId(entityId);
-        auditTrail.setParameter(auditParameter);
 
         auditManager.put(auditKey, auditTrail);
     }
 
-    private void postSnapshot(String auditKey, Class<?> entityClazz, List<SqlParameter> sqlParameters, Object[] args) {
+    private void postSnapshot(String auditKey, Class<?> entityClazz, List<SqlParameter> sqlParameters, Map<String, Object> auditParameter, Object[] args) {
         AuditAttribute auditTrail = auditManager.get(auditKey);
 
         if (auditTrail.getCommandType().isInsert()) {
@@ -98,6 +96,7 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         }
 
         List<SqlRow> updatedData = repository.findAllById(entityClazz, sqlParameters);
+        auditTrail.setParameter(auditParameter);
         auditTrail.setUpdatedRows(updatedData);
     }
 

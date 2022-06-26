@@ -6,6 +6,7 @@ Add lib (./build/libs/audit-0.0.1-plain.jar') to build path.
 ```
 
 ## Configuration
+다음과 같이 Spring Context에 AuditAdvisorConfig를 등록하면 설정이 완료됩니다.
 ```java
 import org.springframework.context.annotation.Configuration;
 import spring.lims.audit.config.AuditAdvisorConfig;
@@ -14,13 +15,11 @@ import spring.lims.audit.config.AuditAdvisorConfig;
 public class AuditAspect extends AuditAdvisorConfig {
 }
 ```
-Spring Context에 AuditAdvisorConfig를 등록하면 설정이 완료됩니다.
 
----
+<br/>
 
-### Custom Configuration
-
-Spring Audit Trail의 설정 기본값입니다. AuditConfigurer 인터페이스를 구현하여 설정을 변경할 수 있습니다.
+> ### Custom Configuration
+기본값 대신 다른 설정을 적용하고자 할 때, 다음과 같이 AuditConfigurer 인터페이스를 구현하여 설정을 변경할 수 있습니다.
 
 ```java
 @Configuration
@@ -61,7 +60,7 @@ public class AuditTrailConfigurer implements AuditConfigurer {
   + <b>SNAKE_TO_CAMEL</b>
   + <b>NONE</b> : Case 변환 작업을 하지 않습니다.
 - ### DatabaseType
-  + <b>Oracle</b> (기본값) 
+  + <b>ORACLE</b> (기본값) 
 
 <br/>
 
@@ -69,7 +68,7 @@ public class AuditTrailConfigurer implements AuditConfigurer {
 
 ## Usage
 
-### Define Audit Entity
+> ### Define Audit Entity
 ```java
 @AuditEntity(name = "Member")
 public class Member {
@@ -84,23 +83,24 @@ public class Member {
 }
 ```
 - @AuditEntity( name: 테이블명 )
-  + 테이블과 1:1로 매핑되는 객체이며 여기에 정의된 필드를 기준으로 Audit 이력이 작성됩니다.
+  + 테이블과 1:1로 매핑되는 객체이며 여기에 정의된 필드를 기준으로 Audit 변경 이력이 작성됩니다.
 - @Audit
   + 어노테이션을 통해 해당 테이블의 식별키를 명시합니다. <br/> @Audit 쿼리가 실행 될 때 넘긴 파라미터에서 AuditId 필드의 값을 매핑한 뒤 해당 Id 값으로 변경되는 이력을 추적합니다.
 
+<br/>
 
-### Declaritive Audit
+> ### Declaritive Audit
 ```java
 @Audit(target = Member.class)
 int updateMember(MemberDto dto);
 ```
-- @Audit(target:Class<?>, label:String, content:String) <br/>
+- @Audit(target : Class<?>, label : String, content : String) <br/>
   + 변경 이력을 구독할 repository interface에 선언합니다. <br/>
-  쿼리가 실행될 때, MemberDto에서 Entity.class 내 @AuditId로 선언된 필드의 값을 매핑하여 변경 이력을 저장합니다.
+  위 예시를 보면 Entity.class 내 @AuditId로 선언된 필드를 파라미터 dto에서 찾아 해당 값을 기준으로 변경 이력을 저장합니다.
 
+<br/>
 
-### Subscribe Transaction Event
-
+> ### Subscribe Transaction Event
 ```java
 @Configuration
 public class AuditTrailEventListener implements AuditEventListener {

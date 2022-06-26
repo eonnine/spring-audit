@@ -63,14 +63,13 @@ public class AuditTrailConfigurer implements AuditConfigurer {
 - ### DatabaseType
   + <b>Oracle</b> (기본값) 
 
+<br/>
 
 ※ @AuditId가 userId인 테이블이 있고, userId가 '1'인 사용자와 '2'인 사용자의 정보가 동일한 트랜잭션 내에서 변경될 때, 각각 id를 기준으로 이력을 추적합니다. 즉, userId가 '1'인 사용자의 이력과 '2'인 사용자의 이력이 각각 추적됩니다.
 
 ## Usage
 
----
-
-- ## Define Audit Entity
+### Define Audit Entity
 ```java
 @AuditEntity(name = "Member")
 public class Member {
@@ -90,7 +89,7 @@ public class Member {
   + 어노테이션을 통해 해당 테이블의 식별키를 명시합니다. <br/> @Audit 쿼리가 실행 될 때 넘긴 파라미터에서 AuditId 필드의 값을 매핑한 뒤 해당 Id 값으로 변경되는 이력을 추적합니다.
 
 
-- ## Declaritive Audit
+### Declaritive Audit
 ```java
 @Audit(target = Member.class)
 int updateMember(MemberDto dto);
@@ -100,7 +99,7 @@ int updateMember(MemberDto dto);
   쿼리가 실행될 때, MemberDto에서 Entity.class 내 @AuditId로 선언된 필드의 값을 매핑하여 변경 이력을 저장합니다.
 
 
-- ## Subscribe Transaction Event
+### Subscribe Transaction Event
 
 ```java
 @Configuration
@@ -124,14 +123,14 @@ public class AuditTrailEventListener implements AuditEventListener {
 @Audit을 명시한 쿼리가 포함된 트랜잭션을 구독하는 Listener입니다. <br/> 
 트랜잭션이 종료되기 전, 후에 맞게 Audit 이력 객체를 통해 원하는 작업을 처리할 수 있습니다.
 
-- ### AuditEventLister
+- #### AuditEventLister
 | Method       | Description                                                                         |
 |:-------------|:------------------------------------------------------------------------------------|
 | beforeCommit | Audit이 수행되는 트랜잭션이 커밋되기 전에 호출됩니다. Unchecked 예외가 발생하면 rollback됩니다.
 | afterCommit  | Audit이 수행되는 트랜잭션이 커밋된 후 호출됩니다. 예외가 발생해도 rollback되지 않습니다.
 
 
-- ### AuditTrail
+- #### AuditTrail
 | Property    | Type  | Description                                                                  |                                                          |
 |:------------|:-------|:----------------------------------------------------------------------------|:---------------------------------------------------------|
 | CommandType | Enum  | 수행된 작업의 구분값입니다.                                                      | INSERT, UPDTE, DELETE                                    

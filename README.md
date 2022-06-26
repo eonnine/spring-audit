@@ -52,10 +52,6 @@ public class AuditTrailConfigurer implements AuditConfigurer {
   + <b>TRANSANCTION</b> (기본값) : 변경 전 상태와 최종 변경 상태에 대한 이력을 동일한 ID값을 기준으로 제공합니다. 이 옵션일 때, AuditEventListener에서 구독하는 AuditTrail의 getParam은 마지막으로 변경이 일어난 쿼리에 대한 파라미터를 제공합니다.
   + <b>EACH</b> : 수행되는 모든 변경에 대해 이력을 동일한 ID값을 기준으로 제공합니다.
 
-  
-※ @AuditId가 userId인 테이블이 있고, userId가 '1'인 사용자와 '2'인 사용자의 정보가 동일한 트랜잭션 내에서 변경될 때, 각각 id를 기준으로 이력을 추적합니다. 즉, userId가 '1'인 사용자의 이력과 '2'인 사용자의 이력이 각각 추적됩니다.
-
-
 - ### DisplayType
   + <b>COMMENT</b> (기본값) : 제공되는 변경 이력에 컬럼의 코멘트를 보여줍니다. 코멘트 정보가 없다면 컬럼명이 출력됩니다.
   + <b>COLUMN</b> : 제공되는 변경 이력에 컬럼명을 보여줍니다.
@@ -67,6 +63,8 @@ public class AuditTrailConfigurer implements AuditConfigurer {
 - ### DatabaseType
   + <b>Oracle</b> (기본값) 
 
+
+※ @AuditId가 userId인 테이블이 있고, userId가 '1'인 사용자와 '2'인 사용자의 정보가 동일한 트랜잭션 내에서 변경될 때, 각각 id를 기준으로 이력을 추적합니다. 즉, userId가 '1'인 사용자의 이력과 '2'인 사용자의 이력이 각각 추적됩니다.
 
 ## Usage
 

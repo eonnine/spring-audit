@@ -12,20 +12,8 @@ import javax.sql.DataSource;
 public class AuditAdvisorConfig {
 
     @Bean
-    public static Advisor auditTrailAdvisor(DataSource dataSource, ApplicationContext context) {
-        return new AuditAdvisor(dataSource, auditConfigurer(context), auditEventListener(context)).create();
-    }
-
-    public static AuditConfigurer auditConfigurer(ApplicationContext context) {
-        return existsBean(context, AuditConfigurer.class) ? context.getBean(AuditConfigurer.class) : new DefaultAuditConfigurer();
-    }
-
-    public static AuditEventListener auditEventListener(ApplicationContext context) {
-        return existsBean(context, AuditEventListener.class) ? context.getBean(AuditEventListener.class) : new DefaultAuditEventListener();
-    }
-
-    private static boolean existsBean(ApplicationContext context, Class<?> clazz) {
-        return !context.getBeansOfType(clazz).isEmpty();
+    public Advisor auditTrailAdvisor(ApplicationContext context, DataSource dataSource) {
+        return new AuditAdvisor(context, dataSource).create();
     }
 
 }

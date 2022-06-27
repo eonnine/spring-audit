@@ -1,5 +1,6 @@
 package spring.audit.config;
 
+import spring.audit.context.AuditApplicationContextAware;
 import spring.audit.context.AuditManager;
 import spring.audit.context.DecisiveRecordAuditManager;
 import spring.audit.context.FullRecordAuditManager;
@@ -8,6 +9,7 @@ import spring.audit.domain.RecordScope;
 import spring.audit.event.AuditEventListener;
 import spring.audit.event.AuditEventPublisher;
 import spring.audit.event.AuditTransactionListener;
+import spring.audit.event.DefaultAuditEventListener;
 import spring.audit.sql.*;
 import spring.audit.util.AuditAnnotationReader;
 import spring.audit.util.FieldNameConverter;
@@ -23,7 +25,10 @@ public class AuditBeanConfig {
     private final AuditAnnotationReader annotationReader;
     private final AuditSqlConfig sqlConfig;
 
-    public AuditBeanConfig(DataSource dataSource, AuditConfigurer configurer, AuditEventListener eventListener) {
+    public AuditBeanConfig(AuditApplicationContextAware contextAware, DataSource dataSource) {
+        AuditConfigurer configurer = createAuditConfigurer(contextAware);
+        AuditEventListener eventListener = createAuditEventListener(contextAware);
+
         StringConverter stringConverter = createStringConverter(configurer);
         AuditSqlManager sqlManager = new AuditSqlManager();
         AuditSqlGenerator sqlGenerator = createAuditSqlGenerator(configurer.databaseType());
@@ -57,6 +62,20 @@ public class AuditBeanConfig {
 
     public AuditAnnotationReader annotationReader() {
         return this.annotationReader;
+    }
+
+    private AuditConfigurer createAuditConfigurer(AuditApplicationContextAware contextAware) {
+        if (existsBean(contextAware, AuditConfigurer.class)) {
+            return contextAware.getApplicationContext().getBean(AuditConfigurer.class);
+        }
+        return new DefaultAuditConfigurer();
+    }
+
+    private AuditEventListener createAuditEventListener(AuditApplicationContextAware contextAware) {
+        if (existsBean(contextAware, AuditEventListener.class)) {
+            return contextAware.getApplicationContext().getBean(AuditEventListener.class);
+        }
+        return new DefaultAuditEventListener();
     }
 
     private AuditManager createAuditManager(AuditConfigurer configurer) {
@@ -101,5 +120,8 @@ public class AuditBeanConfig {
         return new FieldNameConverter(configurer);
     }
 
+    private boolean existsBean(AuditApplicationContextAware contextAware, Class<?> clazz) {
+        return !contextAware.getApplicationContext().getBeansOfType(clazz).isEmpty();
+    }
 
 }

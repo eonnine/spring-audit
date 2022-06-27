@@ -1,7 +1,9 @@
 package spring.audit.aop;
 
+import org.springframework.context.ApplicationContext;
 import spring.audit.config.AuditBeanConfig;
 import spring.audit.config.AuditConfigurer;
+import spring.audit.context.AuditApplicationContextAware;
 import spring.audit.context.AuditManager;
 import spring.audit.event.AuditEventListener;
 import spring.audit.event.AuditTransactionListener;
@@ -19,11 +21,11 @@ public class AuditAdvisor {
     private final AuditTransactionListener transactionListener;
     private final AuditAnnotationReader annotationReader;
 
-    public AuditAdvisor(DataSource dataSource, AuditConfigurer configurer, AuditEventListener eventListener) {
-        AuditBeanConfig beanConfig = new AuditBeanConfig(dataSource, configurer, eventListener);
+    public AuditAdvisor(ApplicationContext context, DataSource dataSource) {
+        AuditBeanConfig beanConfig = new AuditBeanConfig(new AuditApplicationContextAware(context), dataSource);
         this.auditManager = beanConfig.auditManager();
-        this.repository = beanConfig.sqlRepository();
         this.transactionListener = beanConfig.transactionListener();
+        this.repository = beanConfig.sqlRepository();
         this.annotationReader = beanConfig.annotationReader();
     }
 

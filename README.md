@@ -48,19 +48,19 @@ public class AuditTrailConfigurer implements AuditConfigurer {
 }
 ```
 
-- ### RecordScope
+- #### RecordScope
   + <b>TRANSANCTION</b> (기본값) : 변경 전 상태와 최종 변경 상태에 대한 이력을 동일한 ID값을 기준으로 제공합니다. 이 옵션일 때, AuditEventListener에서 구독하는 AuditTrail의 getParam은 마지막으로 변경이 일어난 쿼리에 대한 파라미터를 제공합니다.
   + <b>EACH</b> : 수행되는 모든 변경에 대해 이력을 동일한 ID값을 기준으로 제공합니다.
 
-- ### DisplayType
+- #### DisplayType
   + <b>COMMENT</b> (기본값) : 제공되는 변경 이력에 컬럼의 코멘트를 보여줍니다. 코멘트 정보가 없다면 컬럼명이 출력됩니다.
   + <b>COLUMN</b> : 제공되는 변경 이력에 컬럼명을 보여줍니다.
 
-- ### StringConvertCase
+- #### StringConvertCase
   + <b>CAMEL_TO_SNAKE</b> (기본값) : Java Field가 camel case, DB column이 snake case일 때 사용합니다.  
   + <b>SNAKE_TO_CAMEL</b>
   + <b>NONE</b> : Case 변환 작업을 하지 않습니다.
-- ### DatabaseType
+- #### DatabaseType
   + <b>ORACLE</b> (기본값) 
 
 <br/>

@@ -1,8 +1,9 @@
 # Spring Audit Trail
 
 ## Install
+Add libarary to build path.
 ```
-Add lib (./build/libs/audit-0.0.1-plain.jar') to build path.
+./build/libs/audit-0.0.1-plain.jar'
 ```
 
 ## Configuration

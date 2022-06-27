@@ -49,7 +49,7 @@ public class AuditTrailConfigurer implements AuditConfigurer {
 ```
 
 - #### RecordScope
-  + <b>TRANSANCTION</b> (기본값) : 변경 전 상태와 최종 변경 상태에 대한 이력을 동일한 ID값을 기준으로 제공합니다. 이 옵션일 때, AuditEventListener에서 구독하는 AuditTrail의 getParam은 마지막으로 변경이 일어난 쿼리에 대한 파라미터를 제공합니다.
+  + <b>TRANSANCTION</b> (기본값) : 변경 전 상태와 최종 변경 상태에 대한 이력을 동일한 ID값을 기준으로 제공합니다. 이 옵션일 때, AuditEventListener에서 구독하는 AuditTrail은 마지막으로 변경이 일어난 쿼리의 Audit 데이터를 제공합니다.
   + <b>EACH</b> : 수행되는 모든 변경에 대해 이력을 동일한 ID값을 기준으로 제공합니다.
 
 - #### DisplayType
@@ -132,14 +132,17 @@ public class AuditTrailEventListener implements AuditEventListener {
 
 
 - #### AuditTrail
+
+RecordScope 설정값이 TRANSACTION이라면 가장 마지막에 변경이 일어난 @Audit 데이터를 제공합니다.
+
 | Property    | Type  | Description                                                                  |                                                          |
 |:------------|:-------|:----------------------------------------------------------------------------|:---------------------------------------------------------|
 | CommandType | Enum  | 수행된 작업의 구분값입니다.                                                      | INSERT, UPDTE, DELETE                                    
 | Diff        | String| 변경되기 이전값과 이후값을 비교하여 생성된 문자열입니다. 여러 행 출력 시 ','로 구분됩니다. | { 제목: \`테스트 제목\` -> \`시험기록부\`, 작성자: \`테스트\` -> \`관리자\` } 
-| Label       | String| @Audit 어노테이션에서 부여한 label값입니다.                                       |
-| Content     | String| @Audit 어노테이션에서 부여한 content값입니다.                                     |
-| Id          | Map   | @Audit이 선언된 쿼리가 수행될 때 사용한 Parameter에서 @AuditId에 해당하는 정보입니다.  |         
-| Param       | Map   | @Audit이 선언된 쿼리가 수행될 때 사용한 Parameter 정보입니다.                       | RecordScope.TRANSACTION일 때, 가장 마지막에 변경이 일어난 쿼리 기준입니다.         
+| Label       | String| @Audit 어노테이션에서 부여한 label값입니다.                                       
+| Content     | String| @Audit 어노테이션에서 부여한 content값입니다.                                     
+| Id          | Map   | @Audit이 선언된 쿼리가 수행될 때 사용한 Parameter에서 @AuditId에 해당하는 정보입니다.       
+| Param       | Map   | @Audit이 선언된 쿼리가 수행될 때 사용한 Parameter 정보입니다. 
 
 
 ## supports

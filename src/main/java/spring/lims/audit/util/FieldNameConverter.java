@@ -5,6 +5,7 @@ import spring.lims.audit.domain.StringConvertCase;
 import org.apache.logging.log4j.util.Strings;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,11 +17,12 @@ public class FieldNameConverter implements StringConverter {
 
     public FieldNameConverter(AuditConfigurer configurer) {
         this.configurer = configurer;
-        this.converter = Map.of(
-                StringConvertCase.NONE, this::none,
-                StringConvertCase.CAMEL_TO_SNAKE, this::camelToSnake,
-                StringConvertCase.SNAKE_TO_CAMEL, this::snakeToCamel
-        );
+
+        Map<StringConvertCase, Function<String, String>> converter = new HashMap<>();
+        converter.put(StringConvertCase.NONE, this::none);
+        converter.put(StringConvertCase.CAMEL_TO_SNAKE, this::camelToSnake);
+        converter.put(StringConvertCase.SNAKE_TO_CAMEL, this::snakeToCamel);
+        this.converter = converter;
     }
 
     @Override

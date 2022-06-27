@@ -4,7 +4,10 @@ import org.springframework.aop.Advisor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import spring.lims.audit.aop.AuditAdvisor;
+import spring.lims.audit.condition.AuditConfigurerCondition;
+import spring.lims.audit.condition.AuditEventListenerCondition;
 import spring.lims.audit.event.AuditEventListener;
 import spring.lims.audit.event.DefaultAuditEventListener;
 
@@ -13,13 +16,13 @@ import javax.sql.DataSource;
 public class AuditAdvisorConfig {
 
     @Bean
-    @ConditionalOnMissingBean
+    @Conditional(AuditEventListenerCondition.class)
     public AuditEventListener auditEventListener() {
         return new DefaultAuditEventListener();
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @Conditional(AuditConfigurerCondition.class)
     public AuditConfigurer auditConfigurer() {
         return new DefaultAuditConfigurer();
     }

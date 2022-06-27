@@ -36,6 +36,11 @@ public class AuditAnnotationReader {
         return method.getAnnotation(Audit.class);
     }
 
+    public AuditEntity getAuditEntityAnnotation(Class<?> entityClazz) {
+        assertHasAuditEntityAnnotation(entityClazz);
+        return entityClazz.getAnnotation(AuditEntity.class);
+    }
+
     public Class<?> getAuditEntity(Audit audit) {
         Class<?> clazz = audit.target();
         assertHasAuditEntityAnnotation(clazz);

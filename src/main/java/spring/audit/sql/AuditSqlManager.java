@@ -16,4 +16,9 @@ public class AuditSqlManager {
     public SqlEntity get(String name) {
         return sql.get(name);
     }
+
+    public boolean has(String name) {
+        return sql.containsKey(name);
+    }
+    
 }

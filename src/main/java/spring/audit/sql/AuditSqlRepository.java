@@ -29,14 +29,14 @@ public class AuditSqlRepository {
         return DataSourceUtils.getConnection(dataSource);
     }
 
-    public List<SqlParameter> getSqlParameters(Class<?> entityClazz, Map<String, Object> parameter) {
-        SqlEntity sqlEntity = sqlManager.get(entityClazz.getName());
+    public List<SqlParameter> getSqlParameters(String sqlManagerKey, Map<String, Object> parameter) {
+        SqlEntity sqlEntity = sqlManager.get(sqlManagerKey);
         return sqlProvider.getSqlParameters(sqlEntity, parameter);
     }
 
-    public List<SqlRow> findAllById(Class<?> entityClazz, List<SqlParameter> sqlParameters) {
+    public List<SqlRow> findAllById(String sqlManagerKey, List<SqlParameter> sqlParameters) {
         String commentSuffix = AbstractSqlGenerator.COMMENT_SUFFIX;
-        SqlEntity sqlEntity = sqlManager.get(entityClazz.getName());
+        SqlEntity sqlEntity = sqlManager.get(sqlManagerKey);
         String conditionClause = sqlProvider.makeConditionClause(sqlParameters);
 
         String sql = sqlEntity.getSelectClause() + conditionClause;

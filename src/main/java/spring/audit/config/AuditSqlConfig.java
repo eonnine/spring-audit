@@ -28,11 +28,17 @@ public class AuditSqlConfig {
 
             for (BeanDefinition bd : entities) {
                 String className = bd.getBeanClassName();
+
                 Class<?> entityClazz = Class.forName(className);
                 AuditEntity entityAnnotation = entityClazz.getAnnotation(AuditEntity.class);
                 List<String> idFields = annotationReader.getIdFieldNames(entityClazz);
+                String tableName = entityAnnotation.name();
 
-                String selectClause = sqlProvider.generateSelectClause(entityClazz, entityAnnotation.name());
+                if (sqlManager.has(tableName)) {
+                    throw new RuntimeException("There is already entity name of 'AuditEntity' annotation. '" + tableName + "' [" + className + "]");
+                }
+
+                String selectClause = sqlProvider.generateSelectClause(entityClazz, tableName);
 
                 SqlEntity entity = new SqlEntity();
                 entity.setName(className);
@@ -40,7 +46,7 @@ public class AuditSqlConfig {
                 entity.setIdFields(idFields);
                 entity.setSelectClause(selectClause);
 
-                sqlManager.put(className, entity);
+                sqlManager.put(tableName, entity);
             }
         } catch(ClassNotFoundException e) {
             throw new RuntimeException("Not found AuditEntity. " + e.getMessage());

@@ -1,6 +1,7 @@
 package spring.audit.context;
 
 import spring.audit.annotation.Audit;
+import spring.audit.annotation.AuditEntity;
 import spring.audit.domain.AuditAttribute;
 import spring.audit.domain.SqlParameter;
 import spring.audit.domain.SqlRow;
@@ -52,19 +53,21 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         Object[] args = getArguments();
         Audit auditAnnotation = annotationReader.getAuditAnnotation(method);
         Class<?> entityClazz = annotationReader.getAuditEntity(auditAnnotation);
+        AuditEntity entityAnnotation = annotationReader.getAuditEntityAnnotation(entityClazz);
+        String sqlManagerKey = entityAnnotation.name();
 
         Map<String, Object> originParameter = convertArgsToMap(entityClazz, args);
-        List<SqlParameter> sqlParameters = getSqlParameter(entityClazz, originParameter);
+        List<SqlParameter> sqlParameters = getSqlParameter(sqlManagerKey, originParameter);
         Map<String, Object> entityId = getEntityId(sqlParameters);
         String auditKey = generateAuditKey(entityId, entityClazz);
 
         if (isPreSnapshotTarget(auditKey)) {
-            preSnapshot(auditKey, entityClazz, sqlParameters);
+            preSnapshot(auditKey, sqlManagerKey, sqlParameters);
         }
 
         Object result = target.proceed();
         if (isPostSnapshotTarget(result)) {
-            postSnapshot(auditKey, entityClazz, sqlParameters, entityId, originParameter, args, auditAnnotation);
+            postSnapshot(auditKey, sqlManagerKey, entityClazz, sqlParameters, entityId, originParameter, args, auditAnnotation);
         }
 
         return result;
@@ -75,22 +78,22 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         AuditTransactionManager.bindListener(transactionListener);
     }
 
-    private void preSnapshot(String auditKey, Class<?> entityClazz, List<SqlParameter> sqlParameters) {
-        List<SqlRow> originData = repository.findAllById(entityClazz, sqlParameters);
+    private void preSnapshot(String auditKey, String sqlManagerKey, List<SqlParameter> sqlParameters) {
+        List<SqlRow> originData = repository.findAllById(sqlManagerKey, sqlParameters);
         AuditAttribute auditTrail = new AuditAttribute();
         auditTrail.setOriginRows(originData);
         auditManager.put(auditKey, auditTrail);
     }
 
-    private void postSnapshot(String auditKey, Class<?> entityClazz, List<SqlParameter> sqlParameters, Map<String, Object> entityId, Map<String,
-            Object> originParameter, Object[] args, Audit auditAnnotation) {
+    private void postSnapshot(String auditKey, String sqlManagerKey, Class<?> entityClazz, List<SqlParameter> sqlParameters,
+                              Map<String, Object> entityId, Map<String, Object> originParameter, Object[] args, Audit auditAnnotation) {
         AuditAttribute auditTrail = auditManager.get(auditKey);
 
         if (auditTrail.getCommandType().isInsert()) {
-            sqlParameters = getSqlParameter(entityClazz, convertArgsToMap(entityClazz, args));
+            sqlParameters = getSqlParameter(sqlManagerKey, convertArgsToMap(entityClazz, args));
         }
 
-        List<SqlRow> updatedData = repository.findAllById(entityClazz, sqlParameters);
+        List<SqlRow> updatedData = repository.findAllById(sqlManagerKey, sqlParameters);
         auditTrail.setLabel(auditAnnotation.label());
         auditTrail.setContent(auditAnnotation.content());
         auditTrail.setId(entityId);
@@ -114,8 +117,8 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         return v instanceof Integer && ((Integer) v) > 0;
     }
 
-    private List<SqlParameter> getSqlParameter(Class<?> entityClazz, Map<String,Object> parameter) {
-        return repository.getSqlParameters(entityClazz, parameter);
+    private List<SqlParameter> getSqlParameter(String sqlManagerKey, Map<String,Object> parameter) {
+        return repository.getSqlParameters(sqlManagerKey, parameter);
     }
 
     private Map<String, Object> getEntityId(List<SqlParameter> sqlParameters) {

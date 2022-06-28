@@ -1,5 +1,9 @@
 # Spring Audit Trail
 
+## Ready
+
+- 트랜잭션 내에서 동작하므로 선언적 트랜잭션(AOP Transaction)을 설정합니다.
+
 ## Install
 Add libarary to build path.
 ```

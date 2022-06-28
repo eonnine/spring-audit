@@ -1,5 +1,6 @@
 package spring.audit.config;
 
+import org.springframework.context.ApplicationContext;
 import spring.audit.context.AuditApplicationContextAware;
 import spring.audit.context.AuditManager;
 import spring.audit.context.DecisiveRecordAuditManager;
@@ -16,112 +17,123 @@ import spring.audit.util.FieldNameConverter;
 import spring.audit.util.StringConverter;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuditBeanConfig {
 
-    private final AuditManager auditManager;
-    private final AuditSqlRepository sqlRepository;
-    private final AuditTransactionListener transactionListener;
-    private final AuditAnnotationReader annotationReader;
-    private final AuditSqlConfig sqlConfig;
+    private final DataSource dataSource;
+    private final Map<String, Object> beanFactory = new HashMap<>();
 
     public AuditBeanConfig(AuditApplicationContextAware contextAware, DataSource dataSource) {
-        AuditConfigurer configurer = createAuditConfigurer(contextAware);
-        AuditEventListener eventListener = createAuditEventListener(contextAware);
-
-        StringConverter stringConverter = createStringConverter(configurer);
-        AuditSqlManager sqlManager = new AuditSqlManager();
-        AuditSqlGenerator sqlGenerator = createAuditSqlGenerator(configurer.databaseType());
-        AuditSqlProvider sqlProvider = createAuditSqlProvider(sqlGenerator, stringConverter);
-        AuditEventPublisher eventPublisher = createAuditEventPublisher(eventListener);
-
-        this.auditManager = createAuditManager(configurer);
-        this.sqlRepository = createAuditSqlRepository(dataSource, sqlManager, sqlProvider);
-        this.annotationReader = new AuditAnnotationReader();
-        this.transactionListener = createAuditTransactionListener(configurer, this.auditManager, eventPublisher);
-        this.sqlConfig = createAuditSqlConfig(sqlManager, sqlProvider, this.annotationReader);
-
+        this.dataSource = dataSource;
+        setBean(AuditApplicationContextAware.class, contextAware);
         postConstruct();
     }
 
     private void postConstruct() {
-        this.sqlConfig.initialize();
+        sqlConfig().initialize();
     }
 
+    private void setBean(Class<?> clazz, Object instance) {
+        beanFactory.put(clazz.getName(), instance);
+    }
+
+    private ApplicationContext applicationContext() {
+        return ((AuditApplicationContextAware) beanFactory.get(AuditApplicationContextAware.class.getName())).getApplicationContext();
+    }
+
+    private boolean existsBean(Class<?> clazz) {
+        return !applicationContext().getBeansOfType(clazz).isEmpty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T getBean(Class<T> clazz, T instance) {
+        String name = clazz.getName();
+        if (!beanFactory.containsKey(name)) {
+            beanFactory.put(name, instance);
+        }
+        return (T) beanFactory.get(name);
+    }
+
+    /**
+     * context
+     */
     public AuditManager auditManager() {
-        return this.auditManager;
-    }
-
-    public AuditSqlRepository sqlRepository() {
-        return this.sqlRepository;
-    }
-
-    public AuditTransactionListener transactionListener() {
-        return this.transactionListener;
-    }
-
-    public AuditAnnotationReader annotationReader() {
-        return this.annotationReader;
-    }
-
-    private AuditConfigurer createAuditConfigurer(AuditApplicationContextAware contextAware) {
-        if (existsBean(contextAware, AuditConfigurer.class)) {
-            return contextAware.getApplicationContext().getBean(AuditConfigurer.class);
-        }
-        return new DefaultAuditConfigurer();
-    }
-
-    private AuditEventListener createAuditEventListener(AuditApplicationContextAware contextAware) {
-        if (existsBean(contextAware, AuditEventListener.class)) {
-            return contextAware.getApplicationContext().getBean(AuditEventListener.class);
-        }
-        return new DefaultAuditEventListener();
-    }
-
-    private AuditManager createAuditManager(AuditConfigurer configurer) {
-        RecordScope scope = configurer.recordScope();
+        RecordScope scope = configurer().recordScope();
         if (scope.isEach()) {
-            return new FullRecordAuditManager();
+            return getBean(AuditManager.class, new FullRecordAuditManager());
         }
         else if (scope.isTransaction()) {
-            return new DecisiveRecordAuditManager();
+            return getBean(AuditManager.class, new DecisiveRecordAuditManager());
         }
         throw new RuntimeException("Unknown auditTrail record scope. Configure record scope using AuditTrailConfigurer");
     }
 
-    private AuditSqlGenerator createAuditSqlGenerator(DatabaseType dataBaseType) {
-        if (dataBaseType.isOracle()) {
-            return new OracleAuditSqlGenerator();
+    private AuditConfigurer configurer() {
+        if (existsBean(AuditConfigurer.class)) {
+            return applicationContext().getBean(AuditConfigurer.class);
         }
-        return new OracleAuditSqlGenerator();
+        return getBean(AuditConfigurer.class, new DefaultAuditConfigurer());
     }
 
-    private AuditSqlConfig createAuditSqlConfig(AuditSqlManager sqlManager, AuditSqlProvider sqlProvider, AuditAnnotationReader annotationReader) {
-        return new AuditSqlConfig(sqlManager, sqlProvider, annotationReader);
+
+    /**
+     * sql
+     */
+    public AuditSqlRepository sqlRepository() {
+        return getBean(AuditSqlRepository.class, new AuditSqlRepository(dataSource, sqlManager(), sqlProvider()));
     }
 
-    private AuditSqlRepository createAuditSqlRepository(DataSource dataSource, AuditSqlManager sqlManager, AuditSqlProvider sqlProvider) {
-        return new AuditSqlRepository(dataSource, sqlManager, sqlProvider);
+    private AuditSqlManager sqlManager() {
+        return getBean(AuditSqlManager.class, new AuditSqlManager());
     }
 
-    private AuditSqlProvider createAuditSqlProvider(AuditSqlGenerator sqlGenerator, StringConverter stringConverter) {
-        return new AuditSqlProvider(sqlGenerator, stringConverter);
+    private AuditSqlProvider sqlProvider() {
+        return getBean(AuditSqlProvider.class, new AuditSqlProvider(sqlGenerator(), stringConverter()));
     }
 
-    private AuditEventPublisher createAuditEventPublisher(AuditEventListener eventListener) {
-        return new AuditEventPublisher(eventListener);
+    private AuditSqlGenerator sqlGenerator() {
+        DatabaseType type = configurer().databaseType();
+        if (type.isOracle()) {
+            return getBean(AuditSqlGenerator.class, new OracleAuditSqlGenerator());
+        }
+        throw new RuntimeException("Unknown auditTrail database type. Configure database type using AuditTrailConfigurer");
     }
 
-    private AuditTransactionListener createAuditTransactionListener(AuditConfigurer configurer, AuditManager auditManager, AuditEventPublisher eventPublisher) {
-        return new AuditTransactionListener(configurer, auditManager, eventPublisher);
+    private AuditSqlConfig sqlConfig() {
+        return getBean(AuditSqlConfig.class, new AuditSqlConfig(sqlManager(), sqlProvider(), annotationReader()));
     }
 
-    private StringConverter createStringConverter(AuditConfigurer configurer) {
-        return new FieldNameConverter(configurer);
+
+    /**
+     * event
+     */
+    public AuditTransactionListener transactionListener() {
+        return getBean(AuditTransactionListener.class, new AuditTransactionListener(configurer(), auditManager(), eventPublisher()));
     }
 
-    private boolean existsBean(AuditApplicationContextAware contextAware, Class<?> clazz) {
-        return !contextAware.getApplicationContext().getBeansOfType(clazz).isEmpty();
+    private AuditEventListener eventListener() {
+        if (existsBean(AuditEventListener.class)) {
+            return applicationContext().getBean(AuditEventListener.class);
+        }
+        return getBean(AuditEventListener.class, new DefaultAuditEventListener());
+    }
+
+    private AuditEventPublisher eventPublisher() {
+        return getBean(AuditEventPublisher.class, new AuditEventPublisher(eventListener()));
+    }
+
+
+    /**
+     * util
+     */
+    public AuditAnnotationReader annotationReader() {
+        return getBean(AuditAnnotationReader.class, new AuditAnnotationReader());
+    }
+
+    private StringConverter stringConverter() {
+        return getBean(StringConverter.class, new FieldNameConverter(configurer()));
     }
 
 }

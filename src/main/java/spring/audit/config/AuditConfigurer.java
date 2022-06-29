@@ -1,9 +1,9 @@
 package spring.audit.config;
 
-import spring.audit.domain.DatabaseType;
-import spring.audit.domain.DisplayType;
-import spring.audit.domain.RecordScope;
-import spring.audit.domain.StringConvertCase;
+import spring.audit.type.DatabaseType;
+import spring.audit.type.DisplayType;
+import spring.audit.type.RecordScope;
+import spring.audit.type.StringConvertCase;
 
 public interface AuditConfigurer {
 

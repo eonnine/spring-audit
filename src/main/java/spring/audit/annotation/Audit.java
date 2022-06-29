@@ -1,7 +1,5 @@
 package spring.audit.annotation;
 
-import org.springframework.core.annotation.AliasFor;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,6 +13,6 @@ public @interface Audit {
 
     String label() default "";
 
-    String content() default "";
+    String title() default "";
 
 }

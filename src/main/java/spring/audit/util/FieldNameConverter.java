@@ -1,7 +1,7 @@
 package spring.audit.util;
 
 import spring.audit.config.AuditConfigurer;
-import spring.audit.domain.StringConvertCase;
+import spring.audit.type.StringConvertCase;
 import org.apache.logging.log4j.util.Strings;
 
 import java.util.Arrays;

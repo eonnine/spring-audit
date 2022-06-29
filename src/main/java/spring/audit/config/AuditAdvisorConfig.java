@@ -13,7 +13,7 @@ public class AuditAdvisorConfig {
 
     @Bean
     public Advisor auditTrailAdvisor(ApplicationContext context, DataSource dataSource) {
-        return new AuditAdvisor(context, dataSource).create();
+        return new AuditAdvisor().create(context, dataSource);
     }
 
 }

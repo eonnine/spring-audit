@@ -1,6 +1,8 @@
 package spring.audit.domain;
 
 import spring.audit.config.AuditConfigurer;
+import spring.audit.type.CommandType;
+import spring.audit.type.DisplayType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -9,6 +11,7 @@ public class AuditAttribute {
     private CommandType commandType = CommandType.UPDATE;
     private boolean isTouched = false;
     private String label = "";
+    private String title = "";
     private String content = "";
     private Map<String, Object> id;
     private Map<String, Object> parameter;
@@ -21,8 +24,8 @@ public class AuditAttribute {
         return AuditTrail.builder()
                 .commandType(getCommandType())
                 .label(getLabel())
-                .content(getContent())
-                .diff(getDiffString(configurer.displayType()))
+                .title(getTitle())
+                .content(getDiffString(configurer.displayType()))
                 .id(getId())
                 .param(getParameter())
                 .build();
@@ -155,8 +158,8 @@ public class AuditAttribute {
         return label;
     }
 
-    private String getContent() {
-        return content;
+    private String getTitle() {
+        return title;
     }
 
     public void setId(Map<String, Object> id) {
@@ -171,8 +174,8 @@ public class AuditAttribute {
         this.label = label;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public void setOriginRows(List<SqlRow> originRows) {

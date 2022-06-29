@@ -80,16 +80,17 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
     private void postSnapshot(AuditMeta meta) {
         AuditAttribute auditTrail = auditManager.get(meta.getAuditManagerKey());
 
+        Map<String, Object> parameter = convertArgsToMap(meta.getEntity(), getArguments());
         List<SqlParameter> sqlParameters = meta.getSqlParams();
         if (auditTrail.getCommandType().isInsert()) {
-            sqlParameters = getSqlParameter(meta.getSqlManagerKey(), convertArgsToMap(meta.getEntity(), meta.getArgs()));
+            sqlParameters = getSqlParameter(meta.getSqlManagerKey(), parameter);
         }
         List<SqlRow> updatedData = repository.findAllById(meta.getSqlManagerKey(), sqlParameters);
 
         auditTrail.setLabel(meta.getAuditAnnotation().label());
-        auditTrail.setContent(meta.getAuditAnnotation().content());
+        auditTrail.setTitle(meta.getAuditAnnotation().title());
         auditTrail.setId(meta.getEntityId());
-        auditTrail.setParameter(meta.getOriginParam());
+        auditTrail.setParameter(parameter);
         auditTrail.setUpdatedRows(updatedData);
     }
 
@@ -116,13 +117,9 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         String auditKey = generateAuditKey(entityId, entityClazz);
 
         AuditMeta meta = new AuditMeta();
-        meta.setMethod(method);
-        meta.setArgs(args);
         meta.setAuditAnnotation(auditAnnotation);
-        meta.setAuditEntityAnnotation(entityAnnotation);
         meta.setEntity(entityClazz);
         meta.setEntityId(entityId);
-        meta.setOriginParam(originParameter);
         meta.setSqlParams(sqlParameters);
         meta.setAuditManagerKey(auditKey);
         meta.setSqlManagerKey(sqlManagerKey);

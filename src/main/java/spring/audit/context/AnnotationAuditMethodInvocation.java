@@ -3,6 +3,7 @@ package spring.audit.context;
 import spring.audit.annotation.Audit;
 import spring.audit.annotation.AuditEntity;
 import spring.audit.domain.AuditAttribute;
+import spring.audit.domain.AuditMeta;
 import spring.audit.domain.SqlParameter;
 import spring.audit.domain.SqlRow;
 import spring.audit.event.AuditTransactionListener;
@@ -50,24 +51,15 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
             return target.proceed();
         }
 
-        Object[] args = getArguments();
-        Audit auditAnnotation = annotationReader.getAuditAnnotation(method);
-        Class<?> entityClazz = annotationReader.getAuditEntity(auditAnnotation);
-        AuditEntity entityAnnotation = annotationReader.getAuditEntityAnnotation(entityClazz);
-        String sqlManagerKey = entityAnnotation.name();
+        AuditMeta meta = getAuditMetadata(method);
 
-        Map<String, Object> originParameter = convertArgsToMap(entityClazz, args);
-        List<SqlParameter> sqlParameters = getSqlParameter(sqlManagerKey, originParameter);
-        Map<String, Object> entityId = getEntityId(sqlParameters);
-        String auditKey = generateAuditKey(entityId, entityClazz);
-
-        if (isPreSnapshotTarget(auditKey)) {
-            preSnapshot(auditKey, sqlManagerKey, sqlParameters);
+        if (isPreSnapshotTarget(meta.getAuditManagerKey())) {
+            preSnapshot(meta);
         }
 
         Object result = target.proceed();
         if (isPostSnapshotTarget(result)) {
-            postSnapshot(auditKey, sqlManagerKey, entityClazz, sqlParameters, entityId, originParameter, args, auditAnnotation);
+            postSnapshot(meta);
         }
 
         return result;
@@ -78,26 +70,26 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         AuditTransactionManager.bindListener(transactionListener);
     }
 
-    private void preSnapshot(String auditKey, String sqlManagerKey, List<SqlParameter> sqlParameters) {
-        List<SqlRow> originData = repository.findAllById(sqlManagerKey, sqlParameters);
+    private void preSnapshot(AuditMeta meta) {
+        List<SqlRow> originData = repository.findAllById(meta.getSqlManagerKey(), meta.getSqlParams());
         AuditAttribute auditTrail = new AuditAttribute();
         auditTrail.setOriginRows(originData);
-        auditManager.put(auditKey, auditTrail);
+        auditManager.put(meta.getAuditManagerKey(), auditTrail);
     }
 
-    private void postSnapshot(String auditKey, String sqlManagerKey, Class<?> entityClazz, List<SqlParameter> sqlParameters,
-                              Map<String, Object> entityId, Map<String, Object> originParameter, Object[] args, Audit auditAnnotation) {
-        AuditAttribute auditTrail = auditManager.get(auditKey);
+    private void postSnapshot(AuditMeta meta) {
+        AuditAttribute auditTrail = auditManager.get(meta.getAuditManagerKey());
 
+        List<SqlParameter> sqlParameters = meta.getSqlParams();
         if (auditTrail.getCommandType().isInsert()) {
-            sqlParameters = getSqlParameter(sqlManagerKey, convertArgsToMap(entityClazz, args));
+            sqlParameters = getSqlParameter(meta.getSqlManagerKey(), convertArgsToMap(meta.getEntity(), meta.getArgs()));
         }
+        List<SqlRow> updatedData = repository.findAllById(meta.getSqlManagerKey(), sqlParameters);
 
-        List<SqlRow> updatedData = repository.findAllById(sqlManagerKey, sqlParameters);
-        auditTrail.setLabel(auditAnnotation.label());
-        auditTrail.setContent(auditAnnotation.content());
-        auditTrail.setId(entityId);
-        auditTrail.setParameter(originParameter);
+        auditTrail.setLabel(meta.getAuditAnnotation().label());
+        auditTrail.setContent(meta.getAuditAnnotation().content());
+        auditTrail.setId(meta.getEntityId());
+        auditTrail.setParameter(meta.getOriginParam());
         auditTrail.setUpdatedRows(updatedData);
     }
 
@@ -107,6 +99,34 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
 
     private boolean isPostSnapshotTarget(Object result) {
         return isUpdated(result);
+    }
+
+    private AuditMeta getAuditMetadata(Method method) {
+        Object[] args = getArguments();
+        Audit auditAnnotation = annotationReader.getAuditAnnotation(method);
+
+        Class<?> entityClazz = annotationReader.getAuditEntity(auditAnnotation);
+        AuditEntity entityAnnotation = annotationReader.getAuditEntityAnnotation(entityClazz);
+
+        String sqlManagerKey = entityAnnotation.name();
+        Map<String, Object> originParameter = convertArgsToMap(entityClazz, args);
+        List<SqlParameter> sqlParameters = getSqlParameter(sqlManagerKey, originParameter);
+
+        Map<String, Object> entityId = getEntityId(sqlParameters);
+        String auditKey = generateAuditKey(entityId, entityClazz);
+
+        AuditMeta meta = new AuditMeta();
+        meta.setMethod(method);
+        meta.setArgs(args);
+        meta.setAuditAnnotation(auditAnnotation);
+        meta.setAuditEntityAnnotation(entityAnnotation);
+        meta.setEntity(entityClazz);
+        meta.setEntityId(entityId);
+        meta.setOriginParam(originParameter);
+        meta.setSqlParams(sqlParameters);
+        meta.setAuditManagerKey(auditKey);
+        meta.setSqlManagerKey(sqlManagerKey);
+        return meta;
     }
 
     private boolean isInteger(Object v) {

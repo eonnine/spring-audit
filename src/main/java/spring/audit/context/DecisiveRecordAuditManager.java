@@ -39,6 +39,7 @@ public class DecisiveRecordAuditManager extends AbstractAuditManager {
     }
 
     public void remove() {
+        super.remove();
         attributeStore.remove();
     }
 

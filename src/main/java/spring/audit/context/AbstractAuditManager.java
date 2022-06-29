@@ -1,6 +1,7 @@
 package spring.audit.context;
 
 import spring.audit.domain.AuditAttribute;
+import spring.audit.domain.AuditMeta;
 import spring.audit.domain.AuditTrail;
 import spring.audit.event.AuditTransactionManager;
 
@@ -9,14 +10,30 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractAuditManager implements AuditManager {
-    private final Map<String, List<AuditTrail>> auditStore = new HashMap<>();
+    private final ThreadLocal<Map<String, List<AuditTrail>>> auditStore = new ThreadLocal<>();
 
     public void putAudits(List<AuditTrail> auditTrails) {
-        auditStore.put(getCurrentTransactionId(), auditTrails);
+        if (auditStore.get() == null) {
+            auditStore.set(new HashMap<>());
+        }
+        Map<String, List<AuditTrail>> resource = auditStore.get();
+        resource.put(getCurrentTransactionId(), auditTrails);
     }
 
     public List<AuditTrail> getAudits() {
-        return auditStore.get(getCurrentTransactionId());
+        String key = getCurrentTransactionId();
+        if (auditStore.get() == null) {
+            return null;
+        }
+        if (!auditStore.get().containsKey(key)) {
+            return null;
+        }
+        return auditStore.get().get(getCurrentTransactionId());
+    }
+
+    @Override
+    public void remove() {
+        auditStore.remove();
     }
 
     protected String getCurrentTransactionId() {
@@ -31,9 +48,6 @@ public abstract class AbstractAuditManager implements AuditManager {
 
     @Override
     public abstract boolean has(String key);
-
-    @Override
-    public abstract void remove();
 
     @Override
     public abstract List<AuditAttribute> getAsList();

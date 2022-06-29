@@ -52,6 +52,7 @@ public class FullRecordAuditManager extends AbstractAuditManager {
 
     @Override
     public void remove() {
+        super.remove();
         attributeStore.remove();
     }
 

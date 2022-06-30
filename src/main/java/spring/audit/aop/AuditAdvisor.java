@@ -14,17 +14,8 @@ public class AuditAdvisor {
     public Advisor create(ApplicationContext context, DataSource dataSource) {
         AspectJExpressionPointcut annotationPointcut = new AspectJExpressionPointcut();
         annotationPointcut.setExpression("@annotation(spring.audit.annotation.Audit)");
-
         AuditBeanConfig beanConfig = new AuditBeanConfig(new AuditApplicationContextAware(context), dataSource);
-
-        AuditAdvice advice = new AuditAdvice(
-                beanConfig.auditManager(),
-                beanConfig.sqlRepository(),
-                beanConfig.transactionListener(),
-                beanConfig.annotationReader()
-        );
-
-        return new DefaultPointcutAdvisor(annotationPointcut, advice);
+        return new DefaultPointcutAdvisor(annotationPointcut, beanConfig.auditAdvice());
     }
 
 }

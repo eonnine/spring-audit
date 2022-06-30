@@ -1,5 +1,7 @@
 package spring.audit.event;
 
+import org.springframework.transaction.IllegalTransactionStateException;
+import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.UUID;
@@ -16,7 +18,7 @@ public class AuditTransactionManager {
 
     public static void initCurrentTransaction() {
         if (hasCurrentTransactionResource()) {
-            throw new RuntimeException("Already exists auditTrail resource in current transaction [" + TransactionSynchronizationManager.getCurrentTransactionName() + "]");
+            throw new IllegalTransactionStateException("Already exists auditTrail resource in current transaction [" + TransactionSynchronizationManager.getCurrentTransactionName() + "]");
         }
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.initSynchronization();
@@ -26,7 +28,7 @@ public class AuditTransactionManager {
 
     public static String getCurrentTransactionId() {
         if (!hasCurrentTransactionResource()) {
-            throw new RuntimeException("Not found current auditTrail resource in current transaction [" + TransactionSynchronizationManager.getCurrentTransactionName() + "]");
+            throw new NoTransactionException("Not found current auditTrail resource in current transaction [" + TransactionSynchronizationManager.getCurrentTransactionName() + "]");
         }
         return (String) TransactionSynchronizationManager.getResource(RESOURCE_NAME);
     }

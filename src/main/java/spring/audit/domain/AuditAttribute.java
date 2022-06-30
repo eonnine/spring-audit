@@ -1,5 +1,6 @@
 package spring.audit.domain;
 
+import org.springframework.util.CollectionUtils;
 import spring.audit.config.AuditConfigurer;
 import spring.audit.type.CommandType;
 import spring.audit.type.DisplayType;
@@ -12,7 +13,6 @@ public class AuditAttribute {
     private boolean isTouched = false;
     private String label = "";
     private String title = "";
-    private String content = "";
     private Map<String, Object> id;
     private Map<String, Object> parameter;
     private List<SqlRow> originRows = new ArrayList<>();
@@ -139,7 +139,7 @@ public class AuditAttribute {
     }
 
     private boolean isEmpty(Collection<?> collection) {
-        return collection == null || collection.isEmpty();
+        return CollectionUtils.isEmpty(collection);
     }
 
     public CommandType getCommandType() {

@@ -1,5 +1,6 @@
 package spring.audit.util;
 
+import org.springframework.core.annotation.AnnotationConfigurationException;
 import spring.audit.annotation.Audit;
 import spring.audit.annotation.AuditEntity;
 import spring.audit.annotation.AuditId;
@@ -22,7 +23,7 @@ public class AuditAnnotationReader {
                 .filter(field -> field.isAnnotationPresent(AuditId.class))
                 .collect(Collectors.toList());
         if (fields.isEmpty()) {
-            throw new RuntimeException("There is no field with 'AuditId' annotation in the '" + clazz.getSimpleName() + "'. [" + clazz.getName() + "]");
+            throw new AnnotationConfigurationException("There is no field with 'AuditId' annotation in the '" + clazz.getSimpleName() + "'. [" + clazz.getName() + "]");
         }
         return fields;
     }
@@ -58,7 +59,7 @@ public class AuditAnnotationReader {
             return;
         }
         assert method != null;
-        throw new RuntimeException("Method '" + method.getName() + "' has not 'Audit' annotation. [" + method.getDeclaringClass().getName() + "]");
+        throw new AnnotationConfigurationException("Method '" + method.getName() + "' has not 'Audit' annotation. [" + method.getDeclaringClass().getName() + "]");
     }
 
     private void assertHasAuditEntityAnnotation(Class<?> entityClazz) {
@@ -66,7 +67,7 @@ public class AuditAnnotationReader {
             return;
         }
         assert entityClazz != null;
-        throw new RuntimeException("Class '" + entityClazz.getSimpleName() + "' has not 'AuditEntity' annotation. [" + entityClazz.getName() + "]");
+        throw new AnnotationConfigurationException("Class '" + entityClazz.getSimpleName() + "' has not 'AuditEntity' annotation. [" + entityClazz.getName() + "]");
     }
 
 }

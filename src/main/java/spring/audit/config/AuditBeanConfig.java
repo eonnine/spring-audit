@@ -1,17 +1,18 @@
 package spring.audit.config;
 
 import org.springframework.context.ApplicationContext;
+import spring.audit.aop.AuditAdvice;
 import spring.audit.context.AuditApplicationContextAware;
 import spring.audit.context.AuditManager;
 import spring.audit.context.DecisiveRecordAuditManager;
 import spring.audit.context.FullRecordAuditManager;
-import spring.audit.type.DatabaseType;
-import spring.audit.type.RecordScope;
 import spring.audit.event.AuditEventListener;
 import spring.audit.event.AuditEventPublisher;
 import spring.audit.event.AuditTransactionListener;
 import spring.audit.event.DefaultAuditEventListener;
 import spring.audit.sql.*;
+import spring.audit.type.DatabaseType;
+import spring.audit.type.RecordScope;
 import spring.audit.util.AuditAnnotationReader;
 import spring.audit.util.FieldNameConverter;
 import spring.audit.util.StringConverter;
@@ -56,10 +57,14 @@ public class AuditBeanConfig {
         return (T) beanFactory.get(name);
     }
 
+    public AuditAdvice auditAdvice() {
+        return getBean(AuditAdvice.class, new AuditAdvice(auditManager(), sqlRepository(), transactionListener(), annotationReader()));
+    }
+
     /**
      * context
      */
-    public AuditManager auditManager() {
+    private AuditManager auditManager() {
         RecordScope scope = configurer().recordScope();
         if (scope.isEach()) {
             return getBean(AuditManager.class, new FullRecordAuditManager());
@@ -67,7 +72,7 @@ public class AuditBeanConfig {
         else if (scope.isTransaction()) {
             return getBean(AuditManager.class, new DecisiveRecordAuditManager());
         }
-        throw new RuntimeException("Unknown auditTrail record scope. Configure record scope using AuditTrailConfigurer");
+        throw new EnumConstantNotPresentException(RecordScope.class, scope.name());
     }
 
     private AuditConfigurer configurer() {
@@ -81,7 +86,7 @@ public class AuditBeanConfig {
     /**
      * sql
      */
-    public AuditSqlRepository sqlRepository() {
+    private AuditSqlRepository sqlRepository() {
         return getBean(AuditSqlRepository.class, new AuditSqlRepository(dataSource, sqlManager(), sqlProvider()));
     }
 
@@ -98,7 +103,7 @@ public class AuditBeanConfig {
         if (type.isOracle()) {
             return getBean(AuditSqlGenerator.class, new OracleAuditSqlGenerator());
         }
-        throw new RuntimeException("Unknown auditTrail database type. Configure database type using AuditTrailConfigurer");
+        throw new EnumConstantNotPresentException(DatabaseType.class, type.name());
     }
 
     private AuditSqlConfig sqlConfig() {
@@ -109,7 +114,7 @@ public class AuditBeanConfig {
     /**
      * event
      */
-    public AuditTransactionListener transactionListener() {
+    private AuditTransactionListener transactionListener() {
         return getBean(AuditTransactionListener.class, new AuditTransactionListener(configurer(), auditManager(), eventPublisher()));
     }
 
@@ -128,7 +133,7 @@ public class AuditBeanConfig {
     /**
      * util
      */
-    public AuditAnnotationReader annotationReader() {
+    private AuditAnnotationReader annotationReader() {
         return getBean(AuditAnnotationReader.class, new AuditAnnotationReader());
     }
 

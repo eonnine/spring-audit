@@ -1,8 +1,5 @@
-package spring.audit.config;
+package spring.audit.aop;
 
-import spring.audit.aop.AuditAdvisor;
-import spring.audit.event.AuditEventListener;
-import spring.audit.event.DefaultAuditEventListener;
 import org.springframework.aop.Advisor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;

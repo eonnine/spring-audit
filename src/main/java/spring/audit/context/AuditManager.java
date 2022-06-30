@@ -1,7 +1,6 @@
 package spring.audit.context;
 
 import spring.audit.domain.AuditAttribute;
-import spring.audit.domain.AuditMeta;
 import spring.audit.domain.AuditTrail;
 
 import java.util.List;

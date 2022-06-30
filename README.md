@@ -99,7 +99,7 @@ public class Member {
 @Audit(target = Member.class)
 int updateMember(MemberDto dto);
 ```
-- @Audit(target : Class<?>, label : String, content : String) <br/>
+- @Audit(target : Class<?>, label : String, title : String) <br/>
   + 변경 이력을 구독할 repository interface에 선언합니다. <br/>
   위 예시를 보면 Entity.class 내 @AuditId로 선언된 필드를 파라미터 dto에서 찾아 해당 값을 기준으로 변경 이력을 저장합니다.
 
@@ -114,9 +114,9 @@ public class AuditTrailEventListener implements AuditEventListener {
     public void beforeCommit(List<AuditTrail> auditTrails) {
         auditTrails.forEach(audit -> {
             CommandType commandType = audit.getCommandType();
-            String diff = audit.getDiff();
+            String content = audit.getContent();
             String label = audit.getLabel();
-            String Content = audit.getContent();
+            String title = audit.getTitle();
             Map<String, Object> id = audit.getId();
             Map<String, Object> param = audit.getParam();
         });
@@ -142,9 +142,9 @@ RecordScope 설정값이 TRANSACTION이라면 가장 마지막에 변경이 일�
 | Property    | Type  | Description                                                                  |                                                          |
 |:------------|:-------|:----------------------------------------------------------------------------|:---------------------------------------------------------|
 | CommandType | Enum  | 수행된 작업의 구분값입니다.                                                      | INSERT, UPDTE, DELETE                                    
-| Diff        | String| 변경되기 이전값과 이후값을 비교하여 생성된 문자열입니다. 여러 행 출력 시 ','로 구분됩니다. | { 제목: \`테스트 제목\` -> \`시험기록부\`, 작성자: \`테스트\` -> \`관리자\` } 
+| Content     | String| 변경되기 이전값과 이후값을 비교하여 생성된 문자열입니다. 여러 행 출력 시 ','로 구분됩니다. | { 제목: \`테스트 제목\` -> \`시험기록부\`, 작성자: \`테스트\` -> \`관리자\` } 
 | Label       | String| @Audit 어노테이션에서 부여한 label값입니다.                                       
-| Content     | String| @Audit 어노테이션에서 부여한 content값입니다.                                     
+| Title       | String| @Audit 어노테이션에서 부여한 title값입니다.                                     
 | Id          | Map   | @Audit이 선언된 쿼리가 수행될 때 사용한 Parameter에서 @AuditId에 해당하는 정보입니다.       
 | Param       | Map   | @Audit이 선언된 쿼리가 수행될 때 사용한 Parameter 정보입니다. 
 

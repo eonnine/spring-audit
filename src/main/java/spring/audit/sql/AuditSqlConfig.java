@@ -1,5 +1,6 @@
-package spring.audit.config;
+package spring.audit.sql;
 
+import org.springframework.core.annotation.AnnotationConfigurationException;
 import spring.audit.annotation.AuditEntity;
 import spring.audit.domain.SqlEntity;
 import spring.audit.sql.AuditSqlManager;
@@ -7,6 +8,9 @@ import spring.audit.sql.AuditSqlProvider;
 import spring.audit.util.AuditAnnotationReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.naming.NameAlreadyBoundException;
+import java.rmi.AlreadyBoundException;
 import java.util.List;
 import java.util.Set;
 
@@ -35,7 +39,7 @@ public class AuditSqlConfig {
                 String tableName = entityAnnotation.name();
 
                 if (sqlManager.has(tableName)) {
-                    throw new RuntimeException("There is already entity name of 'AuditEntity' annotation. '" + tableName + "' [" + className + "]");
+                    throw new AnnotationConfigurationException("There is already entity name of 'AuditEntity' annotation. '" + tableName + "' [" + className + "]");
                 }
 
                 String selectClause = sqlProvider.generateSelectClause(entityClazz, tableName);

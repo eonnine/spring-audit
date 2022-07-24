@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import spring.lims.audit.config.AuditAdvisorConfig;
 
 @Configuration
-public class AuditAdvisor extends AuditAdvisorConfig {
+public class AuditTrailAdvisor extends AuditAdvisorConfig {
 }
 ```
 
@@ -28,7 +28,7 @@ public class AuditAdvisor extends AuditAdvisorConfig {
 
 ```java
 @Configuration
-public class AuditConfigurer implements AuditConfigurer {
+public class AuditTrailConfigurer implements AuditConfigurer {
 
     @Override
     public RecordScope recordScope() {
@@ -108,7 +108,7 @@ int updateMember(MemberDto dto);
 > ### Subscribe Transaction Event
 ```java
 @Configuration
-public class AuditEventListener implements AuditEventListener {
+public class AuditTrailListener implements AuditEventListener {
 
     @Override
     public void beforeCommit(List<AuditTrail> auditTrails) {

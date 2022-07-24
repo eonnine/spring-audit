@@ -134,7 +134,7 @@ public class AuditBeanConfig {
      * util
      */
     private AuditAnnotationReader annotationReader() {
-        return getBean(AuditAnnotationReader.class, new AuditAnnotationReader());
+        return getBean(AuditAnnotationReader.class, new AuditAnnotationReader(applicationContext()));
     }
 
     private StringConverter stringConverter() {

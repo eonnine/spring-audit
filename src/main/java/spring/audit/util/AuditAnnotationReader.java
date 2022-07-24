@@ -1,5 +1,6 @@
 package spring.audit.util;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationConfigurationException;
 import spring.audit.annotation.Audit;
 import spring.audit.annotation.AuditEntity;
@@ -7,16 +8,24 @@ import spring.audit.annotation.AuditId;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import spring.audit.context.AuditApplicationContextAware;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AuditAnnotationReader {
+
+    private final ApplicationContext context;
+
+    public AuditAnnotationReader(ApplicationContext context) {
+        this.context = context;
+    }
 
     public List<Field> getIdFields(Class<?> clazz) {
         List<Field> fields = Arrays.stream(clazz.getDeclaredFields())
@@ -48,7 +57,11 @@ public class AuditAnnotationReader {
         return clazz;
     }
 
-    public Set<BeanDefinition> getAnnotationBeans(Class<? extends Annotation> annotationClazz) {
+    public Map<String, Object> getAnnotationBeans(Class<? extends Annotation> annotationClazz) {
+        return context.getBeansWithAnnotation(AuditEntity.class);
+    }
+
+    public Set<BeanDefinition> getAnnotationBeanDefinitions(Class<? extends Annotation> annotationClazz) {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(annotationClazz));
         return scanner.findCandidateComponents("**/*");

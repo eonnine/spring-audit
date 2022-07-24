@@ -11,7 +11,9 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import javax.management.InstanceAlreadyExistsException;
 import javax.naming.NameAlreadyBoundException;
 import java.rmi.AlreadyBoundException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class AuditSqlConfig {
@@ -28,10 +30,11 @@ public class AuditSqlConfig {
 
     public void initialize() {
         try {
-            Set<BeanDefinition> entities = annotationReader.getAnnotationBeans(AuditEntity.class);
+            Map<String, Object> entities = annotationReader.getAnnotationBeans(AuditEntity.class);
+            Collection<Object> beans = entities.values();
 
-            for (BeanDefinition bd : entities) {
-                String className = bd.getBeanClassName();
+            for (Object bean : beans) {
+                String className = bean.getClass().getName();
 
                 Class<?> entityClazz = Class.forName(className);
                 AuditEntity entityAnnotation = entityClazz.getAnnotation(AuditEntity.class);

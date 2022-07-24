@@ -56,6 +56,7 @@ public class AnnotationAuditMethodInvocation implements MethodInvocation {
         }
 
         Object result = target.proceed();
+
         if (isPostSnapshotTarget(result)) {
             postSnapshot(meta);
         }

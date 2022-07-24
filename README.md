@@ -23,7 +23,7 @@ public class AuditConfig extends AuditAdvisorConfig {
 
 <br/>
 
-> ### Custom Configuration (Optional)
+### Custom Configuration (Optional)
 기본값 대신 다른 설정을 적용하고자 할 때, 다음과 같이 AuditConfigurer 인터페이스를 구현하여 설정을 변경할 수 있습니다.
 
 ```java

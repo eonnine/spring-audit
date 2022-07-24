@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 public class AuditAdvisorConfig {
 
     @Bean
-    public Advisor auditTrailAdvisor(ApplicationContext context, DataSource dataSource) {
+    public Advisor auditTrailTransactionAdvisor(ApplicationContext context, DataSource dataSource) {
         return new AuditAdvisor().create(context, dataSource);
     }
 

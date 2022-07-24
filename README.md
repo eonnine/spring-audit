@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import spring.lims.audit.config.AuditAdvisorConfig;
 
 @Configuration
-public class AuditAspect extends AuditAdvisorConfig {
+public class AuditConfig extends AuditAdvisorConfig {
 }
 ```
 

@@ -58,7 +58,7 @@ public class AuditAnnotationReader {
     }
 
     public Map<String, Object> getAnnotationBeans(Class<? extends Annotation> annotationClazz) {
-        return context.getBeansWithAnnotation(AuditEntity.class);
+        return context.getBeansWithAnnotation(annotationClazz);
     }
 
     public Set<BeanDefinition> getAnnotationBeanDefinitions(Class<? extends Annotation> annotationClazz) {
